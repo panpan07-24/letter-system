@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>函件发送系统</title>
+<style>
+body{font-family:sans-serif;max-width:800px;margin:40px auto;padding:20px}
+input,textarea{width:100%;padding:8px;margin:8px 0;box-sizing:border-box}
+textarea{height:200px}
+button{padding:10px 24px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:24px}
+th,td{border:1px solid #ddd;padding:8px;text-align:left}
+.opened{color:green;font-weight:bold}
+.not-opened{color:gray}
+</style>
+</head>
+<body>
+<h1>📄 发函</h1>
+<form action="/send" method="post">
+  <input name="title" placeholder="函件标题（如：关于XX工序延期通知）" required>
+  <textarea name="content" placeholder="函件正文内容..." required></textarea>
+  <button type="submit">生成函件链接</button>
+</form>
+
+<h2>📋 已发函件</h2>
+<table>
+<tr><th>标题</th><th>发送时间</th><th>送达状态</th></tr>
+{% for l in letters %}
+<tr>
+  <td>{{ l.title }}</td>
+  <td>{{ l.created }}</td>
+  <td>{% if l.opened %}<span class="opened">已送达 {{ l.opened }}</span>{% else %}<span class="not-opened">未送达</span>{% endif %}</td>
+</tr>
+{% endfor %}
+</table>
+</body>
+</html>
