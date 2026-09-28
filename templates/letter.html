@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>{{ title }}</title>
+<style>
+body{font-family:sans-serif;max-width:700px;margin:40px auto;padding:20px;line-height:1.8}
+.header{border-bottom:2px solid #2563eb;padding-bottom:12px;margin-bottom:24px}
+.content{white-space:pre-wrap;background:#f9fafb;padding:20px;border-radius:8px}
+.receipt{margin-top:32px;padding:16px;background:#ecfdf5;border:1px solid #10b981;border-radius:8px;color:#065f46}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>{{ title }}</h1>
+  <p style="color:#666;font-size:14px">发送时间：{{ created_at }}</p>
+</div>
+<div class="content">{{ content }}</div>
+<div class="receipt">
+  ✅ 送达确认：本函件已于 <strong>{{ opened_at }}</strong> 被查看，系统已自动记录。
+</div>
+</body>
+</html>
