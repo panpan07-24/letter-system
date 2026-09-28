@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ role_name }} · 函件列表 - 三纬装饰{% endblock %}
+
+{% block nav_actions %}
+  <span style="color: #4a6d94; font-size: 14px; margin-right: 14px;">当前身份：{{ role_name }}</span>
+{% endblock %}
+
+{% block content %}
+
+{% if letters %}
+  {% for l in letters %}
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-size: 17px; font-weight: 700; color: #1e3a5f;">
+          {{ l.title }}
+        </div>
+        <div style="font-size: 12.5px; color: #7a92ad; white-space: nowrap;">
+          {{ l.created }}
+        </div>
+      </div>
+
+      <div style="
+        white-space: pre-wrap;
+        background: #f7faff;
+        border-left: 3px solid #2a6fdb;
+        padding: 14px 18px;
+        border-radius: 6px;
+        color: #2c4a6e;
+        font-size: 14px;
+        line-height: 1.75;
+        margin-bottom: 14px;
+      ">{{ l.content }}</div>
+
+      {% if l.files %}
+        <div style="margin-top: 12px;">
+          <div style="font-size: 13px; color: #4a6d94; margin-bottom: 8px; font-weight: 600;">📎 附件下载：</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            {% for f in l.files %}
+              <a href="{{ f.url }}" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: #eaf1fb;
+                color: #2a6fdb;
+                padding: 7px 14px;
+                border-radius: 6px;
+                font-size: 13px;
+                text-decoration: none;
+                border: 1px solid #d0e0f5;
+              ">⬇ 下载附件</a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <div style="font-size: 46px; margin-bottom: 14px;">📭</div>
+    <div style="font-size: 15px; color: #7a92ad;">暂无函件</div>
+    <div style="font-size: 13px; color: #9aabbe; margin-top: 8px;">当有三纬装饰的函件发送给您时，会显示在这里</div>
+  </div>
+{% endif %}
+
+{% endblock %}
