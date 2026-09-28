@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}发函后台 - 三纬装饰{% endblock %}
+
+{% block nav_actions %}
+  <a href="/admin/logout">退出登录</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-title">📄 发送新函件</div>
+  <form action="/send" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label class="form-label">函件标题</label>
+      <input type="text" name="title" placeholder="如：关于洁具到货延期的通知" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">函件正文</label>
+      <textarea name="content" placeholder="请输入函件正文内容..." required style="min-height: 140px;"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">接收方（可多选）</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 8px;">
+        {% for key, name in roles.items() %}
+          <label style="display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #f7faff; border: 1.5px solid #e3ecf7; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: #2c4a6e;">
+            <input type="checkbox" name="roles" value="{{ key }}" style="width: auto; accent-color: #2a6fdb;">
+            {{ name }}
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">上传附件（图片、PDF等，可多选）</label>
+      <input type="file" name="files" multiple style="padding: 9px; font-size: 13px;">
+    </div>
+
+    <button type="submit" class="btn btn-primary">发送函件</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="card-title">📋 已发函件台账</div>
+  {% if letters %}
+    {% for l in letters %}
+      <div style="border: 1px solid #e3ecf7; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; background: #fbfdff;">
+        <div style="font-weight: 700; color: #1e3a5f; font-size: 15px; margin-bottom: 6px;">
+          {{ l.title }}
+        </div>
+        <div style="font-size: 12.5px; color: #7a92ad; margin-bottom: 12px;">
+          发送时间：{{ l.created }}
+        </div>
+        <div style="font-size: 13px; color: #4a6d94; margin-bottom: 6px;">接收方及查看情况：</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          {% for r in l.roles %}
+            {% if r.viewed_at %}
+              <span style="background: #e8f7ee; color: #1f8a4c; border: 1px solid #b8e6ca; padding: 4px 11px; border-radius: 20px; font-size: 12px;">
+                ✓ {{ r.name }} · {{ r.viewed_at }}
+              </span>
+            {% else %}
+              <span style="background: #f3f4f6; color: #8a95a3; border: 1px solid #e0e5ea; padding: 4px 11px; border-radius: 20px; font-size: 12px;">
+                {{ r.name }} · 未查看
+              </span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div style="text-align: center; padding: 40px 0; color: #9aabbe; font-size: 14px;">
+      还没有发送过函件
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
