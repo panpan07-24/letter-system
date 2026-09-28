@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}管理员登录 - 三纬装饰{% endblock %}
+
+{% block content %}
+<div style="max-width: 420px; margin: 60px auto;">
+  <div class="card">
+    <div style="text-align: center; margin-bottom: 26px;">
+      <svg width="52" height="52" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2a6fdb"/>
+            <stop offset="100%" stop-color="#1e52a8"/>
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="18" fill="none" stroke="url(#lg2)" stroke-width="2.5"/>
+        <path d="M12 15 L20 9 L28 15 L20 21 Z" fill="url(#lg2)" opacity="0.9"/>
+        <path d="M12 22 L20 16 L28 22 L20 28 Z" fill="url(#lg2)" opacity="0.55"/>
+        <path d="M12 29 L20 23 L28 29 L20 35 Z" fill="url(#lg2)" opacity="0.3"/>
+      </svg>
+      <h2 style="margin-top: 14px; color: #1e3a5f; font-size: 19px; letter-spacing: 1px;">
+        三纬装饰 · 函件管理后台
+      </h2>
+    </div>
+
+    {% if error %}
+      <div class="alert-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <div class="form-group">
+        <label class="form-label">管理员密码</label>
+        <input type="password" name="password" placeholder="请输入管理员密码" required autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">进入后台</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
