@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}三纬装饰{% endblock %}</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f5f8fc;
+  color: #1e3a5f;
+  min-height: 100vh;
+}
+
+/* 顶部导航栏 */
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e3ecf7;
+  box-shadow: 0 1px 8px rgba(30, 58, 95, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.navbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 38px;
+  height: 38px;
+}
+.logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e3a5f;
+  letter-spacing: 2px;
+}
+.logo-sub {
+  font-size: 11px;
+  color: #7a92ad;
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+.nav-actions a {
+  color: #4a6d94;
+  text-decoration: none;
+  font-size: 14px;
+  margin-left: 18px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.nav-actions a:hover {
+  background: #eaf1fb;
+  color: #1e3a5f;
+}
+
+/* 主容器 */
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 24px;
+}
+
+/* 卡片 */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(30, 58, 95, 0.06);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin-bottom: 18px;
+  padding-left: 10px;
+  border-left: 4px solid #2a6fdb;
+}
+
+/* 表单元素 */
+input[type=text], input[type=password], textarea, select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #d6e2f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e3a5f;
+  font-family: inherit;
+  transition: border 0.15s;
+  background: #fbfdff;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #2a6fdb;
+  background: #fff;
+}
+textarea { resize: vertical; min-height: 100px; }
+
+/* 按钮 */
+.btn {
+  display: inline-block;
+  padding: 11px 26px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #2a6fdb, #1e52a8);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(42, 111, 219, 0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1e52a8, #16417f);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(42, 111, 219, 0.4);
+}
+.btn-ghost {
+  background: #eaf1fb;
+  color: #2a6fdb;
+}
+.btn-ghost:hover { background: #d8e6f8; }
+
+/* 表单组 */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a6d94;
+  margin-bottom: 7px;
+}
+
+/* 提示信息 */
+.alert-error {
+  background: #fef2f2;
+  color: #c0392b;
+  border: 1px solid #fbd5d5;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .navbar-inner { padding: 12px 16px; }
+  .logo-text { font-size: 17px; }
+  .container { padding: 0 14px; margin: 18px auto; }
+  .card { padding: 18px 18px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="logo">
+      <!-- 三纬装饰 SVG logo -->
+      <svg class="logo-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#2a6fdb"/>
+            <stop offset="100%" stop-color="#1e52a8"/>
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="18" fill="none" stroke="url(#lg)" stroke-width="2.5"/>
+        <path d="M12 15 L20 9 L28 15 L20 21 Z" fill="url(#lg)" opacity="0.9"/>
+        <path d="M12 22 L20 16 L28 22 L20 28 Z" fill="url(#lg)" opacity="0.55"/>
+        <path d="M12 29 L20 23 L28 29 L20 35 Z" fill="url(#lg)" opacity="0.3"/>
+      </svg>
+      <div>
+        <div class="logo-text">三纬装饰</div>
+        <div class="logo-sub">SANWEI DECORATION</div>
+      </div>
+    </a>
+    <div class="nav-actions">
+      {% block nav_actions %}{% endblock %}
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>
