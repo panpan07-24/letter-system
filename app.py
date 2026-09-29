@@ -1,18 +1,16 @@
 import os
 import sqlite3
 import secrets
-import uuid
+import json
 from datetime import datetime
 from flask import (Flask, request, render_template, redirect, url_for,
-                   session, send_from_directory, abort)
+                   session, abort)
 
 app = Flask(__name__)
-app.secret_key = "change-this-secret-2026-sanwei"
+app.secret_key = "sanwei-purchase-2026"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "letters.db")
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+DB_PATH = os.path.join(BASE_DIR, "orders.db")
 
 ADMIN_PASSWORD = "123456"
 ROLE_PASSWORD = "123456"
@@ -37,28 +35,28 @@ ROLES = {
     "chuangdian": "床垫",
     "dianqi":     "电器",
     "chuanglian": "窗帘",
-    "owner":      "业主",
 }
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS letters (
+        CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY,
-            title TEXT NOT NULL,
-            content TEXT NOT NULL,
-            roles TEXT NOT NULL,
-            files TEXT DEFAULT '',
-            created_at TEXT NOT NULL
-        )
-    """)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS views (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            letter_id TEXT NOT NULL,
             role TEXT NOT NULL,
-            viewed_at TEXT NOT NULL,
-            ip TEXT
+            contract_no TEXT,
+            customer TEXT,
+            address TEXT,
+            manager TEXT,
+            supervisor TEXT,
+            start_date TEXT,
+            accept_date TEXT,
+            designer TEXT,
+            designer_phone TEXT,
+            estimator TEXT,
+            estimator_phone TEXT,
+            remark TEXT,
+            items TEXT NOT NULL,
+            created_at TEXT NOT NULL
         )
     """)
     conn.commit()
@@ -67,11 +65,11 @@ def init_db():
 init_db()
 
 def now_str():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now().strftime("%Y-%m-%d")
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-    if request.method == "POST":
+    if request.method == "POST" and "password" in request.form:
         pwd = request.form.get("password", "")
         if pwd == ADMIN_PASSWORD:
             session["is_admin"] = True
@@ -83,68 +81,78 @@ def admin():
 
     conn = sqlite3.connect(DB_PATH)
     rows = conn.execute("""
-        SELECT id, title, roles, created_at FROM letters
+        SELECT id, role, customer, address, created_at FROM orders
         ORDER BY created_at DESC
     """).fetchall()
-    letters = []
-    for r in rows:
-        letter_id, title, roles_str, created = r
-        role_keys = roles_str.split(",") if roles_str else []
-        view_rows = conn.execute("""
-            SELECT role, MAX(viewed_at) FROM views
-            WHERE letter_id = ? GROUP BY role
-        """, (letter_id,)).fetchall()
-        viewed_map = {v[0]: v[1] for v in view_rows}
-        roles_info = []
-        for rk in role_keys:
-            roles_info.append({
-                "key": rk,
-                "name": ROLES.get(rk, rk),
-                "viewed_at": viewed_map.get(rk)
-            })
-        letters.append({
-            "id": letter_id,
-            "title": title,
-            "created": created,
-            "roles": roles_info
-        })
+    orders = [{"id": r[0], "role": r[1], "role_name": ROLES.get(r[1], r[1]),
+               "customer": r[2], "address": r[3], "created": r[4]} for r in rows]
     conn.close()
-    return render_template("admin.html", letters=letters, roles=ROLES)
+    return render_template("admin.html", orders=orders, roles=ROLES)
 
 @app.route("/admin/logout")
 def admin_logout():
     session.clear()
     return redirect(url_for("admin"))
 
-@app.route("/send", methods=["POST"])
-def send():
+@app.route("/create", methods=["POST"])
+def create_order():
     if not session.get("is_admin"):
         return "无权限", 403
 
-    title = request.form.get("title", "").strip()
-    content = request.form.get("content", "").strip()
-    selected_roles = request.form.getlist("roles")
+    role = request.form.get("role", "").strip()
+    if role not in ROLES:
+        return "请选择材料品类", 400
 
-    if not title or not content or not selected_roles:
-        return "标题、内容、接收角色都不能为空", 400
+    rooms = request.form.getlist("room[]")
+    products = request.form.getlist("product[]")
+    brands = request.form.getlist("brand[]")
+    models = request.form.getlist("model[]")
+    specs = request.form.getlist("spec[]")
+    quantities = request.form.getlist("quantity[]")
+    units = request.form.getlist("unit[]")
 
-    letter_id = secrets.token_urlsafe(8)
+    items = []
+    for i in range(len(products)):
+        if products[i].strip():
+            items.append({
+                "room": rooms[i] if i < len(rooms) else "",
+                "product": products[i],
+                "brand": brands[i] if i < len(brands) else "",
+                "model": models[i] if i < len(models) else "",
+                "spec": specs[i] if i < len(specs) else "",
+                "quantity": quantities[i] if i < len(quantities) else "",
+                "unit": units[i] if i < len(units) else "",
+            })
+
+    if not items:
+        return "请至少填写一行材料", 400
+
+    order_id = secrets.token_urlsafe(8)
     created = now_str()
-
-    saved_files = []
-    for f in request.files.getlist("files"):
-        if f and f.filename:
-            ext = os.path.splitext(f.filename)[1]
-            safe_name = f"{uuid.uuid4().hex}{ext}"
-            f.save(os.path.join(UPLOAD_DIR, safe_name))
-            saved_files.append(safe_name)
 
     conn = sqlite3.connect(DB_PATH)
     conn.execute("""
-        INSERT INTO letters (id, title, content, roles, files, created_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (letter_id, title, content, ",".join(selected_roles),
-          ",".join(saved_files), created))
+        INSERT INTO orders (id, role, contract_no, customer, address, manager,
+            supervisor, start_date, accept_date, designer, designer_phone,
+            estimator, estimator_phone, remark, items, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        order_id, role,
+        request.form.get("contract_no", ""),
+        request.form.get("customer", ""),
+        request.form.get("address", ""),
+        request.form.get("manager", ""),
+        request.form.get("supervisor", ""),
+        request.form.get("start_date", ""),
+        request.form.get("accept_date", ""),
+        request.form.get("designer", ""),
+        request.form.get("designer_phone", ""),
+        request.form.get("estimator", ""),
+        request.form.get("estimator_phone", ""),
+        request.form.get("remark", ""),
+        json.dumps(items, ensure_ascii=False),
+        created
+    ))
     conn.commit()
     conn.close()
     return redirect(url_for("admin"))
@@ -168,37 +176,48 @@ def role_view(role_key):
 
     conn = sqlite3.connect(DB_PATH)
     rows = conn.execute("""
-        SELECT id, title, content, files, created_at FROM letters
-        WHERE ',' || roles || ',' LIKE ?
-        ORDER BY created_at DESC
-    """, (f"%,{role_key},%",)).fetchall()
-
-    letters = []
-    for r in rows:
-        letter_id, title, content, files_str, created = r
-        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
-        conn.execute("""
-            INSERT INTO views (letter_id, role, viewed_at, ip)
-            VALUES (?, ?, ?, ?)
-        """, (letter_id, role_key, now_str(), ip))
-
-        files = []
-        if files_str:
-            for fn in files_str.split(","):
-                if fn:
-                    files.append({"name": fn, "url": url_for("download_file", filename=fn)})
-        letters.append({"id": letter_id, "title": title, "content": content,
-                        "created": created, "files": files})
-    conn.commit()
+        SELECT id, contract_no, customer, address, manager, supervisor,
+               start_date, accept_date, designer, designer_phone,
+               estimator, estimator_phone, remark, items, created_at
+        FROM orders WHERE role = ? ORDER BY created_at DESC
+    """, (role_key,)).fetchall()
     conn.close()
-    return render_template("role_view.html", role_name=role_name,
-                           role_key=role_key, letters=letters)
 
-@app.route("/download/<filename>")
-def download_file(filename):
-    if "/" in filename or ".." in filename:
-        abort(400)
-    return send_from_directory(UPLOAD_DIR, filename, as_attachment=True)
+    orders = []
+    for r in rows:
+        orders.append({
+            "id": r[0], "contract_no": r[1], "customer": r[2], "address": r[3],
+            "manager": r[4], "supervisor": r[5], "start_date": r[6],
+            "accept_date": r[7], "designer": r[8], "designer_phone": r[9],
+            "estimator": r[10], "estimator_phone": r[11], "remark": r[12],
+            "items": json.loads(r[13]), "created": r[14]
+        })
+
+    return render_template("order_view.html", role_name=role_name,
+                           role_key=role_key, orders=orders)
+
+@app.route("/print/<order_id>")
+def print_order(order_id):
+    conn = sqlite3.connect(DB_PATH)
+    row = conn.execute("""
+        SELECT id, role, contract_no, customer, address, manager, supervisor,
+               start_date, accept_date, designer, designer_phone,
+               estimator, estimator_phone, remark, items, created_at
+        FROM orders WHERE id = ?
+    """, (order_id,)).fetchone()
+    conn.close()
+    if not row:
+        abort(404)
+
+    order = {
+        "id": row[0], "role": row[1], "role_name": ROLES.get(row[1], row[1]),
+        "contract_no": row[2], "customer": row[3], "address": row[4],
+        "manager": row[5], "supervisor": row[6], "start_date": row[7],
+        "accept_date": row[8], "designer": row[9], "designer_phone": row[10],
+        "estimator": row[11], "estimator_phone": row[12], "remark": row[13],
+        "items": json.loads(row[14]), "created": row[15]
+    }
+    return render_template("order_print.html", order=order)
 
 @app.route("/")
 def index():
