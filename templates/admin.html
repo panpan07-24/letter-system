@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}发函后台 - 三纬装饰{% endblock %}
+{% block title %}采购单后台 - 三纬装饰{% endblock %}
 
 {% block nav_actions %}
   <a href="/admin/logout">退出登录</a>
@@ -8,71 +8,180 @@
 {% block content %}
 
 <div class="card">
-  <div class="card-title">📄 发送新函件</div>
-  <form action="/send" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-      <label class="form-label">函件标题</label>
-      <input type="text" name="title" placeholder="如：关于洁具到货延期的通知" required>
-    </div>
+  <div class="card-title">📝 新建采购联系函</div>
+  <form action="/create" method="post" id="orderForm">
 
     <div class="form-group">
-      <label class="form-label">函件正文</label>
-      <textarea name="content" placeholder="请输入函件正文内容..." required style="min-height: 140px;"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">接收方（可多选）</label>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 8px;">
+      <label class="form-label">材料品类（必选）</label>
+      <select name="role" required style="max-width: 260px;">
+        <option value="">-- 请选择品类 --</option>
         {% for key, name in roles.items() %}
-          <label style="display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #f7faff; border: 1.5px solid #e3ecf7; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: #2c4a6e;">
-            <input type="checkbox" name="roles" value="{{ key }}" style="width: auto; accent-color: #2a6fdb;">
-            {{ name }}
-          </label>
+          <option value="{{ key }}">{{ name }}</option>
         {% endfor %}
+      </select>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+      <div class="form-group">
+        <label class="form-label">客户姓名</label>
+        <input type="text" name="customer">
+      </div>
+      <div class="form-group">
+        <label class="form-label">楼盘地址（送货地址）</label>
+        <input type="text" name="address">
+      </div>
+      <div class="form-group">
+        <label class="form-label">项目经理</label>
+        <input type="text" name="manager">
+      </div>
+      <div class="form-group">
+        <label class="form-label">监理</label>
+        <input type="text" name="supervisor">
+      </div>
+      <div class="form-group">
+        <label class="form-label">合同号（可不填）</label>
+        <input type="text" name="contract_no">
+      </div>
+      <div class="form-group">
+        <label class="form-label">开工日期（可不填）</label>
+        <input type="text" name="start_date" placeholder="如 2026-10-01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">验收日期（可不填）</label>
+        <input type="text" name="accept_date" placeholder="如 2026-12-30">
       </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">上传附件（图片、PDF等，可多选）</label>
-      <input type="file" name="files" multiple style="padding: 9px; font-size: 13px;">
+    <div style="border-top: 1px dashed #d0e0f5; margin: 20px 0 16px; padding-top: 16px;">
+      <div class="form-label" style="font-size: 15px; margin-bottom: 12px;">📦 材料明细（至少一行）</div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px;">
+          <thead>
+            <tr style="background: #eaf1fb; color: #1e3a5f;">
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 10%;">房间</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 22%;">产品名称 *</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 13%;">品牌</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 16%;">型号</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 16%;">规格</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 10%;">数量</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 8%;">单位</th>
+              <th style="padding: 8px; border: 1px solid #d0e0f5; width: 5%;">删</th>
+            </tr>
+          </thead>
+          <tbody id="itemBody">
+            <tr>
+              <td><input type="text" name="room[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td><input type="text" name="product[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td><input type="text" name="brand[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td><input type="text" name="model[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td><input type="text" name="spec[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td><input type="text" name="quantity[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td><input type="text" name="unit[]" style="padding: 6px 8px; font-size: 13px;"></td>
+              <td style="text-align: center;">
+                <button type="button" onclick="removeRow(this)" style="background: #fde8e8; color: #c0392b; border: none; border-radius: 4px; padding: 5px 9px; cursor: pointer; font-size: 13px;">×</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" onclick="addRow()" class="btn btn-ghost" style="margin-top: 12px; font-size: 13px;">+ 添加一行</button>
     </div>
 
-    <button type="submit" class="btn btn-primary">发送函件</button>
+    <div style="border-top: 1px dashed #d0e0f5; margin: 20px 0 16px; padding-top: 16px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">设计师</label>
+          <input type="text" name="designer">
+        </div>
+        <div class="form-group">
+          <label class="form-label">设计师电话</label>
+          <input type="text" name="designer_phone">
+        </div>
+        <div class="form-group">
+          <label class="form-label">预算员</label>
+          <input type="text" name="estimator">
+        </div>
+        <div class="form-group">
+          <label class="form-label">预算员电话</label>
+          <input type="text" name="estimator_phone">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">备注</label>
+        <textarea name="remark" style="min-height: 70px;"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" style="font-size: 15px; padding: 13px 36px;">生成采购单</button>
   </form>
 </div>
 
 <div class="card">
-  <div class="card-title">📋 已发函件台账</div>
-  {% if letters %}
-    {% for l in letters %}
-      <div style="border: 1px solid #e3ecf7; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; background: #fbfdff;">
-        <div style="font-weight: 700; color: #1e3a5f; font-size: 15px; margin-bottom: 6px;">
-          {{ l.title }}
-        </div>
-        <div style="font-size: 12.5px; color: #7a92ad; margin-bottom: 12px;">
-          发送时间：{{ l.created }}
-        </div>
-        <div style="font-size: 13px; color: #4a6d94; margin-bottom: 6px;">接收方及查看情况：</div>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-          {% for r in l.roles %}
-            {% if r.viewed_at %}
-              <span style="background: #e8f7ee; color: #1f8a4c; border: 1px solid #b8e6ca; padding: 4px 11px; border-radius: 20px; font-size: 12px;">
-                ✓ {{ r.name }} · {{ r.viewed_at }}
-              </span>
-            {% else %}
-              <span style="background: #f3f4f6; color: #8a95a3; border: 1px solid #e0e5ea; padding: 4px 11px; border-radius: 20px; font-size: 12px;">
-                {{ r.name }} · 未查看
-              </span>
-            {% endif %}
+  <div class="card-title">📋 已发采购单</div>
+  {% if orders %}
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 13.5px;">
+        <thead>
+          <tr style="background: #eaf1fb; color: #1e3a5f;">
+            <th style="padding: 10px; border: 1px solid #d0e0f5; text-align: left;">品类</th>
+            <th style="padding: 10px; border: 1px solid #d0e0f5; text-align: left;">客户</th>
+            <th style="padding: 10px; border: 1px solid #d0e0f5; text-align: left;">楼盘地址</th>
+            <th style="padding: 10px; border: 1px solid #d0e0f5; text-align: left;">下单日期</th>
+            <th style="padding: 10px; border: 1px solid #d0e0f5; text-align: center;">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td style="padding: 10px; border: 1px solid #e3ecf7;">{{ o.role_name }}</td>
+            <td style="padding: 10px; border: 1px solid #e3ecf7;">{{ o.customer }}</td>
+            <td style="padding: 10px; border: 1px solid #e3ecf7;">{{ o.address }}</td>
+            <td style="padding: 10px; border: 1px solid #e3ecf7;">{{ o.created }}</td>
+            <td style="padding: 10px; border: 1px solid #e3ecf7; text-align: center;">
+              <a href="/print/{{ o.id }}" target="_blank" style="color: #2a6fdb; text-decoration: none;">打印</a>
+            </td>
+          </tr>
           {% endfor %}
-        </div>
-      </div>
-    {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
     <div style="text-align: center; padding: 40px 0; color: #9aabbe; font-size: 14px;">
-      还没有发送过函件
+      还没有生成过采购单
     </div>
   {% endif %}
 </div>
+
+<script>
+function addRow() {
+  var tbody = document.getElementById('itemBody');
+  var tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" name="room[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td><input type="text" name="product[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td><input type="text" name="brand[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td><input type="text" name="model[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td><input type="text" name="spec[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td><input type="text" name="quantity[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td><input type="text" name="unit[]" style="padding: 6px 8px; font-size: 13px;"></td>
+    <td style="text-align: center;">
+      <button type="button" onclick="removeRow(this)" style="background: #fde8e8; color: #c0392b; border: none; border-radius: 4px; padding: 5px 9px; cursor: pointer; font-size: 13px;">×</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+}
+function removeRow(btn) {
+  var tr = btn.closest('tr');
+  var tbody = document.getElementById('itemBody');
+  if (tbody.rows.length > 1) {
+    tr.remove();
+  } else {
+    alert('至少保留一行');
+  }
+}
+</script>
 
 {% endblock %}
