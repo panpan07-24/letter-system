@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>长沙三纬装饰公司主材（{{ order.role_name }}）采购联系函</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "SimSun", "宋体", "Microsoft YaHei", sans-serif;
+    background: #f0f0f0;
+    padding: 20px;
+    color: #000;
+  }
+  .toolbar {
+    max-width: 1100px;
+    margin: 0 auto 14px;
+    text-align: right;
+  }
+  .toolbar button {
+    padding: 10px 26px;
+    background: #2a6fdb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .toolbar button:hover { background: #1e52a8; }
+  .toolbar .back {
+    background: #fff;
+    color: #2a6fdb;
+    border: 1px solid #2a6fdb;
+    margin-right: 10px;
+  }
+
+  .paper {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px 36px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #000;
+    margin-bottom: 18px;
+  }
+
+  .header-info {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 30px;
+    font-size: 14px;
+    margin-bottom: 6px;
+    line-height: 1.9;
+  }
+  .header-info span b { font-weight: normal; }
+  .header-info .label { font-weight: bold; }
+
+  .contract {
+    text-align: right;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  table th, table td {
+    border: 1px solid #000;
+    padding: 8px 6px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  table th {
+    background: #f0f0f0;
+    font-weight: bold;
+    height: 34px;
+  }
+  table td {
+    height: 42px;
+  }
+  table td.left { text-align: left; padding-left: 10px; }
+
+  .footer-info {
+    margin-top: 26px;
+    font-size: 13.5px;
+    line-height: 2;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px 30px;
+  }
+  .footer-col { flex: 1; min-width: 220px; }
+  .footer-col p { margin: 0; }
+  .sign {
+    margin-top: 34px;
+    text-align: right;
+    font-size: 14px;
+    line-height: 2.2;
+  }
+
+  .remark {
+    margin-top: 24px;
+    padding-top: 12px;
+    border-top: 1px dashed #999;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: #333;
+  }
+  .remark b { color: #000; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar { display: none; }
+    .paper { box-shadow: none; padding: 0; max-width: 100%; }
+    @page { size: A4 landscape; margin: 12mm; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="back" onclick="window.close()">关闭</button>
+  <button onclick="window.print()">🖨 立即打印</button>
+</div>
+
+<div class="paper">
+  <h1>长沙三纬装饰公司主材（{{ order.role_name }}）采购联系函</h1>
+
+  <div class="contract">合同号：{{ order.contract_no or '' }}</div>
+
+  <div class="header-info">
+    <div><span class="label">客户姓名：</span>{{ order.customer or '' }}</div>
+    <div><span class="label">楼盘地址：</span>{{ order.address or '' }}</div>
+    <div><span class="label">项目经理：</span>{{ order.manager or '' }}</div>
+    <div><span class="label">监理：</span>{{ order.supervisor or '' }}</div>
+  </div>
+  <div class="header-info">
+    <div><span class="label">开工日期：</span>{{ order.start_date or '' }}</div>
+    <div><span class="label">验收日期：</span>{{ order.accept_date or '' }}</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 8%;">房间</th>
+        <th style="width: 20%;">产品名称</th>
+        <th style="width: 12%;">品牌</th>
+        <th style="width: 15%;">型号</th>
+        <th style="width: 15%;">规格</th>
+        <th style="width: 10%;">数量</th>
+        <th style="width: 10%;">单位</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in order.items %}
+      <tr>
+        <td>{{ it.room }}</td>
+        <td class="left">{{ it.product }}</td>
+        <td>{{ it.brand }}</td>
+        <td>{{ it.model }}</td>
+        <td>{{ it.spec }}</td>
+        <td>{{ it.quantity }}</td>
+        <td>{{ it.unit }}</td>
+      </tr>
+      {% endfor %}
+      {% for _ in range(6 - order.items|length if order.items|length < 6 else 0) %}
+      <tr>
+        <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="footer-info">
+    <div class="footer-col">
+      <p>设计师：{{ order.designer or '' }}&nbsp;&nbsp;&nbsp; 电话：{{ order.designer_phone or '' }}</p>
+      <p>预算员：{{ order.estimator or '' }}&nbsp;&nbsp;&nbsp; 电话：{{ order.estimator_phone or '' }}</p>
+    </div>
+    <div class="footer-col" style="text-align: right;">
+      <p>签发人签字：__________________</p>
+      <p>长沙三纬装饰有限公司（财务盖章）</p>
+      <p>{{ order.created }}</p>
+    </div>
+  </div>
+
+  <div class="remark">
+    <b>备注：</b>此主材采购联系函经设计师与客户确认，由我司预算部开出，由材料部传真至供应商，由工程部项目经理或监理电话通知供应商后方可发货，如所配送材料后期有变更，按变更联系函发货，如未按变更函发货所产生的一切损失由供应商自行承担，公司概不负责，供应商凭此联系函为结算依据，需有预算员及签发人签字方可生效。
+  </div>
+</div>
+
+</body>
+</html>
