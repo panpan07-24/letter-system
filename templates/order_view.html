@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ role_name }} · 采购单 - 三纬装饰{% endblock %}
+
+{% block nav_actions %}
+  <span style="color: #4a6d94; font-size: 14px;">当前身份：{{ role_name }}</span>
+{% endblock %}
+
+{% block content %}
+
+{% if orders %}
+  {% for o in orders %}
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+        <div>
+          <div style="font-size: 17px; font-weight: 700; color: #1e3a5f;">
+            长沙三纬装饰公司主材（{{ role_name }}）采购联系函
+          </div>
+          <div style="font-size: 12.5px; color: #7a92ad; margin-top: 4px;">
+            下单日期：{{ o.created }}
+            {% if o.contract_no %} · 合同号：{{ o.contract_no }}{% endif %}
+          </div>
+        </div>
+        <a href="/print/{{ o.id }}" target="_blank" class="btn btn-primary" style="font-size: 13px; padding: 8px 18px;">🖨 打印 / 导出</a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 20px; background: #f7faff; border-radius: 8px; padding: 14px 18px; font-size: 13.5px; color: #2c4a6e; margin-bottom: 16px;">
+        {% if o.customer %}<div><b>客户姓名：</b>{{ o.customer }}</div>{% endif %}
+        {% if o.address %}<div><b>楼盘地址：</b>{{ o.address }}</div>{% endif %}
+        {% if o.manager %}<div><b>项目经理：</b>{{ o.manager }}</div>{% endif %}
+        {% if o.supervisor %}<div><b>监理：</b>{{ o.supervisor }}</div>{% endif %}
+        {% if o.start_date %}<div><b>开工日期：</b>{{ o.start_date }}</div>{% endif %}
+        {% if o.accept_date %}<div><b>验收日期：</b>{{ o.accept_date }}</div>{% endif %}
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="background: #eaf1fb; color: #1e3a5f;">
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: left;">房间</th>
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: left;">产品名称</th>
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: left;">品牌</th>
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: left;">型号</th>
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: left;">规格</th>
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: right;">数量</th>
+              <th style="padding: 9px 8px; border: 1px solid #d0e0f5; text-align: left;">单位</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in o.items %}
+            <tr>
+              <td style="padding: 8px; border: 1px solid #e3ecf7;">{{ it.room }}</td>
+              <td style="padding: 8px; border: 1px solid #e3ecf7;">{{ it.product }}</td>
+              <td style="padding: 8px; border: 1px solid #e3ecf7;">{{ it.brand }}</td>
+              <td style="padding: 8px; border: 1px solid #e3ecf7;">{{ it.model }}</td>
+              <td style="padding: 8px; border: 1px solid #e3ecf7;">{{ it.spec }}</td>
+              <td style="padding: 8px; border: 1px solid #e3ecf7; text-align: right;">{{ it.quantity }}</td>
+              <td style="padding: 8px; border: 1px solid #e3ecf7;">{{ it.unit }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if o.remark %}
+      <div style="margin-top: 14px; padding: 12px 16px; background: #fffbf0; border-left: 3px solid #e0a94a; border-radius: 6px; font-size: 13px; color: #6b5a2e; line-height: 1.7;">
+        <b>备注：</b>{{ o.remark }}
+      </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="card" style="text-align: center; padding: 60px 20px;">
+    <div style="font-size: 46px; margin-bottom: 14px;">📋</div>
+    <div style="font-size: 15px; color: #7a92ad;">暂无采购单</div>
+    <div style="font-size: 13px; color: #9aabbe; margin-top: 8px;">当三纬装饰给您下采购单时，会显示在这里</div>
+  </div>
+{% endif %}
+
+{% endblock %}
